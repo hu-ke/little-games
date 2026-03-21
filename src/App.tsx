@@ -127,13 +127,27 @@ function App() {
   const SudokuGame = () => {
     if (!gameState) return null;
     
+    // 检查是否为初始数字（不能修改的）
+    const isInitialCell = (row: number, col: number) => {
+      const puzzle = puzzles['sudoku'] as SudokuPuzzle;
+      return puzzle.initial[row][col] !== 0;
+    };
+    
     const handleCellClick = (row: number, col: number) => {
+      // 如果是初始数字，不能选中
+      if (isInitialCell(row, col)) {
+        return;
+      }
       setGameState({...gameState, selectedCell: {row, col}});
     };
 
     const handleNumberInput = (num: number) => {
       if (gameState.selectedCell) {
         const {row, col} = gameState.selectedCell;
+        // 如果是初始数字，不能修改
+        if (isInitialCell(row, col)) {
+          return;
+        }
         const newGrid = [...gameState.grid];
         newGrid[row][col] = num;
         setGameState({...gameState, grid: newGrid});
@@ -170,6 +184,8 @@ function App() {
                   className={`sudoku-cell ${
                     gameState.selectedCell?.row === rowIndex && 
                     gameState.selectedCell?.col === colIndex ? 'selected' : ''
+                  } ${
+                    isInitialCell(rowIndex, colIndex) ? 'initial' : ''
                   }`}
                   onClick={() => handleCellClick(rowIndex, colIndex)}
                 >
