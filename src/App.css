@@ -449,6 +449,108 @@
   }
 }
 
+@keyframes flip {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(180deg);
+  }
+}
+
+@keyframes flip-back {
+  from {
+    transform: rotateY(180deg);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+
+/* 记忆翻牌游戏样式 */
+.memory-game .game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.memory-game h3 {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.memory-game p {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #34495e;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.memory-card {
+  width: 80px;
+  height: 80px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #3498db;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  perspective: 1000px;
+}
+
+.memory-card:not(.flipped):not(.matched) {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+}
+
+.memory-card:not(.flipped):not(.matched):hover {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.memory-card.flipped {
+  background: white;
+  color: #2c3e50;
+  animation: flip 0.6s ease;
+  transform: rotateY(180deg);
+}
+
+.memory-card.matched {
+  background: #27ae60;
+  color: white;
+  cursor: default;
+  box-shadow: 0 0 20px #27ae60;
+}
+
+.memory-card:disabled {
+  cursor: default;
+}
+
+.memory-card:disabled:hover {
+  transform: none;
+}
+
 /* 逻辑网格样式 */
 .logic-grid-game h3 {
   color: #2c3e50;

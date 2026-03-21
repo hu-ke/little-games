@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 
 // 谜题类型定义
-type PuzzleType = 'sudoku' | 'lights-out';
+type PuzzleType = 'sudoku' | 'lights-out' | 'memory';
 
 // 数独谜题类型
 interface SudokuPuzzle {
@@ -18,7 +18,14 @@ interface LightsOutPuzzle {
   initial: boolean[][];
 }
 
-type Puzzle = SudokuPuzzle | LightsOutPuzzle;
+// 记忆翻牌游戏谜题类型
+interface MemoryPuzzle {
+  type: 'memory';
+  size: number;
+  cards: number[];
+}
+
+type Puzzle = SudokuPuzzle | LightsOutPuzzle | MemoryPuzzle;
 
 // 示例谜题数据
 const puzzles: Record<PuzzleType, Puzzle> = {
@@ -58,6 +65,11 @@ const puzzles: Record<PuzzleType, Puzzle> = {
       [true, false, true, false, true]
     ]
   },
+  memory: {
+    type: 'memory',
+    size: 4,
+    cards: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8]
+  }
 
 };
 
@@ -68,6 +80,7 @@ function App() {
   const [showSolution, setShowSolution] = useState(false);
   const [showLightsOutInstructions, setShowLightsOutInstructions] = useState(false);
   const [showLightsOutSolution, setShowLightsOutSolution] = useState(false);
+  const [showMemoryInstructions, setShowMemoryInstructions] = useState(false);
 
   // 初始化游戏状态
   const initializeGame = (puzzleType: PuzzleType) => {
@@ -86,7 +99,21 @@ function App() {
           moves: 0
         });
         break;
-
+      case 'memory':
+        // 洗牌并创建初始状态
+        const shuffledCards = [...(puzzle as MemoryPuzzle).cards].sort(() => Math.random() - 0.5);
+        setGameState({
+          cards: shuffledCards.map((value, index) => ({
+            id: index,
+            value: value,
+            isFlipped: false,
+            isMatched: false
+          })),
+          flippedCards: [],
+          moves: 0,
+          matches: 0
+        });
+        break;
     }
   };
 
@@ -159,6 +186,108 @@ function App() {
             </button>
           ))}
           <button onClick={() => handleNumberInput(0)}>清除</button>
+        </div>
+      </div>
+    );
+  };
+
+  // 记忆翻牌游戏组件
+  const MemoryGame = () => {
+    if (!gameState) return null;
+    
+    const handleCardClick = (cardId: number) => {
+      const card = gameState.cards.find((c: any) => c.id === cardId);
+      
+      // 如果卡片已经匹配或正在翻转，或者已经有2张翻转的卡片，则忽略点击
+      if (card.isMatched || card.isFlipped || gameState.flippedCards.length >= 2) {
+        return;
+      }
+      
+      const newCards = [...gameState.cards];
+      const cardIndex = newCards.findIndex((c: any) => c.id === cardId);
+      newCards[cardIndex] = {...newCards[cardIndex], isFlipped: true};
+      
+      const newFlippedCards = [...gameState.flippedCards, cardId];
+      
+      setGameState({
+        ...gameState,
+        cards: newCards,
+        flippedCards: newFlippedCards,
+        moves: gameState.moves + 1
+      });
+      
+      // 检查是否匹配
+      if (newFlippedCards.length === 2) {
+        const [firstId, secondId] = newFlippedCards;
+        const firstCard = newCards.find((c: any) => c.id === firstId);
+        const secondCard = newCards.find((c: any) => c.id === secondId);
+        
+        if (firstCard.value === secondCard.value) {
+          // 匹配成功
+          setTimeout(() => {
+            const updatedCards = newCards.map((c: any) => 
+              c.id === firstId || c.id === secondId 
+                ? {...c, isMatched: true, isFlipped: true}
+                : c
+            );
+            
+            setGameState({
+              ...gameState,
+              cards: updatedCards,
+              flippedCards: [],
+              matches: gameState.matches + 1
+            });
+          }, 500);
+        } else {
+          // 不匹配，翻回去
+          setTimeout(() => {
+            const updatedCards = newCards.map((c: any) => 
+              c.id === firstId || c.id === secondId 
+                ? {...c, isFlipped: false}
+                : c
+            );
+            
+            setGameState({
+              ...gameState,
+              cards: updatedCards,
+              flippedCards: []
+            });
+          }, 1000);
+        }
+      }
+    };
+
+    const showMemoryInstructionsModal = () => {
+      setShowMemoryInstructions(true);
+    };
+
+    const isGameComplete = gameState.matches === gameState.cards.length / 2;
+
+    return (
+      <div className="memory-game">
+        <div className="game-header">
+          <h3>记忆翻牌游戏</h3>
+          <div className="game-controls">
+            <button className="instruction-btn" onClick={showMemoryInstructionsModal}>
+              游戏说明
+            </button>
+          </div>
+        </div>
+        <p>移动次数: {gameState.moves} | 已匹配: {gameState.matches} / {gameState.cards.length / 2}</p>
+        {isGameComplete && <p className="success">恭喜！你完成了记忆翻牌游戏！</p>}
+        <div className="memory-grid">
+          {gameState.cards.map((card: any) => (
+            <button
+              key={card.id}
+              className={`memory-card ${
+                card.isFlipped || card.isMatched ? 'flipped' : ''
+              } ${card.isMatched ? 'matched' : ''}`}
+              onClick={() => handleCardClick(card.id)}
+              disabled={card.isMatched}
+            >
+              {card.isFlipped || card.isMatched ? card.value : '?'}
+            </button>
+          ))}
         </div>
       </div>
     );
@@ -366,6 +495,48 @@ function App() {
     );
   };
 
+  // 记忆翻牌游戏说明模态框
+  const MemoryInstructionsModal = () => {
+    if (!showMemoryInstructions) return null;
+
+    return (
+      <div className="modal-overlay" onClick={() => setShowMemoryInstructions(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>记忆翻牌游戏说明</h3>
+            <button className="close-btn" onClick={() => setShowMemoryInstructions(false)}>×</button>
+          </div>
+          <div className="modal-body">
+            <h4>游戏规则：</h4>
+            <ul>
+              <li>记忆翻牌游戏是一个4x4的网格，包含16张卡片（8对相同的数字）</li>
+              <li>所有卡片开始时都是背面朝上（显示为"?"）</li>
+              <li>目标是通过最少的移动次数找到所有匹配的卡片对</li>
+              <li>每次可以翻开两张卡片，如果数字相同则保持翻开状态，否则翻回背面</li>
+            </ul>
+            
+            <h4>操作方法：</h4>
+            <ul>
+              <li>点击任意一张卡片将其翻开</li>
+              <li>每次只能翻开两张卡片</li>
+              <li>如果两张卡片数字相同，它们会保持翻开状态</li>
+              <li>如果数字不同，卡片会在短暂显示后自动翻回</li>
+              <li>游戏会记录你的移动次数和已匹配的对数</li>
+            </ul>
+            
+            <h4>记忆技巧：</h4>
+            <ul>
+              <li>尝试记住每张卡片的位置和数字</li>
+              <li>从角落开始，逐步建立记忆模式</li>
+              <li>注意卡片的相对位置关系</li>
+              <li>最佳策略是系统性地翻开卡片，而不是随机点击</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // 熄灯游戏答案显示模态框
   const LightsOutSolutionModal = () => {
     if (!showLightsOutSolution) return null;
@@ -451,6 +622,13 @@ function App() {
             <LightsOutSolutionModal />
           </>
         );
+      case 'memory':
+        return (
+          <>
+            <MemoryGame />
+            <MemoryInstructionsModal />
+          </>
+        );
 
       default:
         return null;
@@ -474,8 +652,8 @@ function App() {
               onClick={() => switchPuzzle(puzzleType as PuzzleType)}
             >
               {puzzleType === 'sudoku' && '数独'}
-              {puzzleType === 'lights-out' && '熄灯游戏'}
-
+            {puzzleType === 'lights-out' && '熄灯游戏'}
+            {puzzleType === 'memory' && '记忆翻牌'}
             </button>
           ))}
         </nav>
