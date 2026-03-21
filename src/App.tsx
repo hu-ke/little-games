@@ -659,7 +659,7 @@ function App() {
   return (
     <div className="App">
       <header className="app-header">
-        <h1>逻辑谜题小游戏</h1>
+        <h1>逻辑谜题小游戏 - 孙熠旻</h1>
         <nav className="puzzle-nav">
           {Object.keys(puzzles).map(puzzleType => (
             <button
