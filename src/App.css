@@ -1,0 +1,628 @@
+/* 全局样式 */
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #333;
+}
+ 
+.app-header {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+ 
+.app-header h1 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+  font-size: 2.5rem;
+  font-weight: 300;
+}
+ 
+/* 导航栏样式 */
+.puzzle-nav {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+ 
+.puzzle-nav button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  background: #3498db;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+ 
+.puzzle-nav button:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+ 
+.puzzle-nav button.active {
+  background: #e74c3c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+ 
+/* 游戏容器 */
+.game-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+ 
+/* 数独游戏样式 */
+.sudoku-game .game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.sudoku-game h3 {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.game-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.instruction-btn, .solution-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.instruction-btn {
+  background: #f39c12;
+  color: white;
+}
+
+.instruction-btn:hover {
+  background: #e67e22;
+  transform: translateY(-2px);
+}
+
+.solution-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.solution-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+ 
+.sudoku-grid {
+  display: inline-block;
+  border: 3px solid #2c3e50;
+  margin-bottom: 1.5rem;
+}
+ 
+.sudoku-row {
+  display: flex;
+}
+ 
+.sudoku-cell {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #bdc3c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+ 
+.sudoku-cell:hover {
+  background: #ecf0f1;
+}
+ 
+.sudoku-cell.selected {
+  background: #3498db;
+  color: white;
+}
+ 
+/* 每3x3区块的边框加粗 */
+.sudoku-row:nth-child(3n) .sudoku-cell {
+  border-bottom: 2px solid #2c3e50;
+}
+ 
+.sudoku-cell:nth-child(3n) {
+  border-right: 2px solid #2c3e50;
+}
+ 
+.number-pad {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+ 
+.number-pad button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: #3498db;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+ 
+.number-pad button:hover {
+  background: #2980b9;
+  transform: scale(1.1);
+}
+ 
+/* 熄灯游戏样式 */
+.lights-out-game .game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.lights-out-game h3 {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.8rem;
+}
+ 
+.lights-out-game p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+ 
+.success {
+  color: #27ae60;
+  font-weight: bold;
+  font-size: 1.2rem !important;
+}
+ 
+.lights-grid {
+  display: inline-block;
+  border: 3px solid #2c3e50;
+  padding: 10px;
+  border-radius: 10px;
+  background: #34495e;
+}
+ 
+.lights-row {
+  display: flex;
+}
+ 
+.light {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #2c3e50;
+  margin: 2px;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+ 
+.light.on {
+  background: #f1c40f;
+  color: #d35400;
+  box-shadow: 0 0 20px #f1c40f;
+}
+ 
+.light.off {
+  background: #7f8c8d;
+  color: #95a5a6;
+}
+ 
+.light:hover {
+  transform: scale(1.05);
+}
+
+/* 模态框样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 15px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #ecf0f1;
+  background: #f8f9fa;
+  border-radius: 15px 15px 0 0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #7f8c8d;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-body h4 {
+  color: #2c3e50;
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.modal-body ul {
+  margin: 0.5rem 0 1rem 1rem;
+  padding: 0;
+}
+
+.modal-body li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* 答案模态框特殊样式 */
+.solution-modal {
+  max-width: 500px;
+}
+
+.solution-grid {
+  display: inline-block;
+  border: 3px solid #2c3e50;
+  margin: 1rem 0;
+}
+
+.solution-row {
+  display: flex;
+}
+
+.solution-cell {
+  width: 35px;
+  height: 35px;
+  border: 1px solid #bdc3c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.solution-cell.given {
+  background: #3498db;
+  color: white;
+}
+
+.solution-cell.solved {
+  background: #27ae60;
+  color: white;
+}
+
+.solution-row:nth-child(3n) .solution-cell {
+  border-bottom: 2px solid #2c3e50;
+}
+
+.solution-cell:nth-child(3n) {
+  border-right: 2px solid #2c3e50;
+}
+
+.solution-legend {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.legend-color.given {
+  background: #3498db;
+}
+
+.legend-color.solved {
+  background: #27ae60;
+}
+
+/* 熄灯游戏解决方案样式 */
+.solution-lights {
+  margin: 1rem 0;
+  background: #34495e;
+  padding: 10px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.light-display {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #2c3e50;
+  margin: 2px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.light-display.on {
+  background: #f1c40f;
+  color: #d35400;
+  box-shadow: 0 0 15px #f1c40f;
+}
+
+.light-display.off {
+  background: #7f8c8d;
+  color: #95a5a6;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 逻辑网格样式 */
+.logic-grid-game h3 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+ 
+.clues {
+  background: #ecf0f1;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+ 
+.clues h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+ 
+.clues p {
+  margin: 0.25rem 0;
+  padding: 0.25rem;
+  background: white;
+  border-radius: 4px;
+}
+ 
+.grid-container {
+  overflow-x: auto;
+}
+ 
+.logic-grid {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+ 
+.logic-grid th,
+.logic-grid td {
+  border: 1px solid #bdc3c7;
+  padding: 0.75rem;
+  text-align: center;
+}
+ 
+.logic-grid th {
+  background: #3498db;
+  color: white;
+  font-weight: 600;
+}
+ 
+.logic-grid td {
+  background: #ecf0f1;
+}
+ 
+.logic-grid input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+ 
+/* 猜数字游戏样式 */
+.mastermind-game h3 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+ 
+.current-guess {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+ 
+.current-guess select {
+  padding: 0.5rem;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  min-width: 120px;
+}
+ 
+.current-guess button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #e74c3c;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+ 
+.current-guess button:hover {
+  background: #c0392b;
+  transform: scale(1.05);
+}
+ 
+.guess-history {
+  text-align: left;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #ecf0f1;
+  padding: 1rem;
+  border-radius: 8px;
+}
+ 
+.guess {
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  background: white;
+  border-radius: 4px;
+  border-left: 4px solid #3498db;
+}
+ 
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .app-header h1 {
+    font-size: 2rem;
+  }
+  
+  .puzzle-nav {
+    gap: 0.5rem;
+  }
+  
+  .puzzle-nav button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .game-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+  
+  .sudoku-cell {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+  
+  .light {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  
+  .current-guess {
+    flex-direction: column;
+  }
+  
+  .current-guess select {
+    min-width: 200px;
+  }
+}
+ 
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+ 
+.game-container > div {
+  animation: fadeIn 0.5s ease-out;
+}
