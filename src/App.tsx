@@ -22,8 +22,16 @@ interface LightsOutPuzzle {
 interface MemoryPuzzle {
   type: 'memory';
   size: number;
-  cards: number[];
+  cards: string[];
 }
+
+// emoji图标映射表
+const emojiIcons = [
+  '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
+  '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔',
+  '🐧', '🐦', '🐤', '🦆', '🦅', '🦉', '🦇', '🐺',
+  '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞'
+];
 
 type Puzzle = SudokuPuzzle | LightsOutPuzzle | MemoryPuzzle;
 
@@ -68,7 +76,7 @@ const puzzles: Record<PuzzleType, Puzzle> = {
   memory: {
     type: 'memory',
     size: 4,
-    cards: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8]
+    cards: emojiIcons.slice(0, 8).flatMap(icon => [icon, icon])
   }
 
 };
@@ -301,7 +309,7 @@ function App() {
               onClick={() => handleCardClick(card.id)}
               disabled={card.isMatched}
             >
-              {card.isFlipped || card.isMatched ? card.value : '?'}
+              {card.isFlipped || card.isMatched ? card.value : '❓'}
             </button>
           ))}
         </div>
@@ -525,24 +533,24 @@ function App() {
           <div className="modal-body">
             <h4>游戏规则：</h4>
             <ul>
-              <li>记忆翻牌游戏是一个4x4的网格，包含16张卡片（8对相同的数字）</li>
-              <li>所有卡片开始时都是背面朝上（显示为"?"）</li>
+              <li>记忆翻牌游戏是一个4x4的网格，包含16张卡片（8对相同的图标）</li>
+              <li>所有卡片开始时都是背面朝上（显示为"❓"）</li>
               <li>目标是通过最少的移动次数找到所有匹配的卡片对</li>
-              <li>每次可以翻开两张卡片，如果数字相同则保持翻开状态，否则翻回背面</li>
+              <li>每次可以翻开两张卡片，如果图标相同则保持翻开状态，否则翻回背面</li>
             </ul>
             
             <h4>操作方法：</h4>
             <ul>
               <li>点击任意一张卡片将其翻开</li>
               <li>每次只能翻开两张卡片</li>
-              <li>如果两张卡片数字相同，它们会保持翻开状态</li>
-              <li>如果数字不同，卡片会在短暂显示后自动翻回</li>
+              <li>如果两张卡片图标相同，它们会保持翻开状态</li>
+              <li>如果图标不同，卡片会在短暂显示后自动翻回</li>
               <li>游戏会记录你的移动次数和已匹配的对数</li>
             </ul>
             
             <h4>记忆技巧：</h4>
             <ul>
-              <li>尝试记住每张卡片的位置和数字</li>
+              <li>尝试记住每张卡片的位置和图标</li>
               <li>从角落开始，逐步建立记忆模式</li>
               <li>注意卡片的相对位置关系</li>
               <li>最佳策略是系统性地翻开卡片，而不是随机点击</li>
