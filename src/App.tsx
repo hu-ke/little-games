@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 
 // 谜题类型定义
-type PuzzleType = 'sudoku' | 'memory' | 'math-puzzle' | 'look-and-say' | 'logic-puzzle';
+type PuzzleType = 'sudoku' | 'memory' | 'math-puzzle' | 'look-and-say' | 'logic-puzzle' | 'thief-puzzle';
 
 // 数独谜题类型
 interface SudokuPuzzle {
@@ -45,6 +45,15 @@ interface LogicPuzzle {
   explanation: string;
 }
 
+// 小偷谜题类型
+interface ThiefPuzzle {
+  type: 'thief-puzzle';
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+}
+
 // emoji图标映射表
 const emojiIcons = [
   '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
@@ -53,7 +62,7 @@ const emojiIcons = [
   '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞'
 ];
 
-type Puzzle = SudokuPuzzle | MemoryPuzzle | MathPuzzle | LookAndSayPuzzle | LogicPuzzle;
+type Puzzle = SudokuPuzzle | MemoryPuzzle | MathPuzzle | LookAndSayPuzzle | LogicPuzzle | ThiefPuzzle;
 
 // 示例谜题数据
 const puzzles: Record<PuzzleType, Puzzle> = {
@@ -97,6 +106,13 @@ const puzzles: Record<PuzzleType, Puzzle> = {
     correctAnswer: 3,
     explanation: '解题思路：\n这是一个经典的逻辑推理题。\n\n分析：\n假设"今天"是星期五（在假设条件下）\n那么"明天"就是星期六\n如果"明天"是"昨天"，意味着实际的"昨天"是星期六\n所以实际的"今天"是星期日\n\n验证：\n- 实际今天是星期日\n- 昨天是星期六\n- 如果昨天（星期六）是明天，那么今天就是星期五（因为星期六是星期五的明天）\n- 这与题目条件一致\n\n所以实际今天是星期日'
   },
+  'thief-puzzle': {
+    type: 'thief-puzzle',
+    question: '甲乙丙丁中只有一人是小偷，且只有一人说了真话。\n甲：我不是小偷\n乙：丁是小偷\n丙：乙是小偷\n丁：我不是小偷',
+    options: ['甲是小偷', '乙是小偷', '丙是小偷', '丁是小偷'],
+    correctAnswer: 0,
+    explanation: '解题思路：\n这是一个经典的逻辑推理题，需要分析每个人的陈述。\n\n分析过程：\n1. 假设甲说的是真话：\n   - 甲说"我不是小偷"为真 → 甲不是小偷\n   - 那么乙、丙、丁都说假话\n   - 乙说"丁是小偷"为假 → 丁不是小偷\n   - 丙说"乙是小偷"为假 → 乙不是小偷\n   - 丁说"我不是小偷"为假 → 丁是小偷\n   - 矛盾：丁既不是小偷又是小偷 → 假设不成立\n\n2. 假设乙说的是真话：\n   - 乙说"丁是小偷"为真 → 丁是小偷\n   - 那么甲、丙、丁都说假话\n   - 甲说"我不是小偷"为假 → 甲是小偷\n   - 矛盾：甲和丁都是小偷 → 假设不成立\n\n3. 假设丙说的是真话：\n   - 丙说"乙是小偷"为真 → 乙是小偷\n   - 那么甲、乙、丁都说假话\n   - 甲说"我不是小偷"为假 → 甲是小偷\n   - 矛盾：甲和乙都是小偷 → 假设不成立\n\n4. 假设丁说的是真话：\n   - 丁说"我不是小偷"为真 → 丁不是小偷\n   - 那么甲、乙、丙都说假话\n   - 甲说"我不是小偷"为假 → 甲是小偷\n   - 乙说"丁是小偷"为假 → 丁不是小偷偷（与丁的陈述一致）\n   - 丙说"乙是小偷偷"为假 → 乙不是小偷偷\n   - 结论：甲是小偷偷，乙、丙、丁都不是小偷偷\n   - 验证：只有甲说假话（甲是小偷偷却说不是），其他人都说真话\n\n所以正确答案是：甲是小偷偷'
+  },
   memory: {
     type: 'memory',
     size: 4,
@@ -114,6 +130,7 @@ function App() {
   const [showMathExplanation, setShowMathExplanation] = useState(false);
   const [showLookAndSayExplanation, setShowLookAndSayExplanation] = useState(false);
   const [showLogicExplanation, setShowLogicExplanation] = useState(false);
+  const [showThiefExplanation, setShowThiefExplanation] = useState(false);
 
   // 初始化游戏状态
   const initializeGame = (puzzleType: PuzzleType) => {
@@ -163,6 +180,13 @@ function App() {
         setUserAnswer(null);
         break;
       case 'logic-puzzle':
+        setGameState({
+          selectedAnswer: null,
+          isAnswered: false
+        });
+        setUserAnswer(null);
+        break;
+      case 'thief-puzzle':
         setGameState({
           selectedAnswer: null,
           isAnswered: false
@@ -780,6 +804,102 @@ function App() {
     );
   };
 
+  // 小偷谜题组件
+  const ThiefPuzzleGame = () => {
+    if (!gameState) return null;
+    const puzzle = puzzles['thief-puzzle'] as ThiefPuzzle;
+    
+    const handleAnswerSelect = (answerIndex: number) => {
+      setUserAnswer(answerIndex);
+      setGameState({
+        ...gameState,
+        selectedAnswer: answerIndex,
+        isAnswered: true
+      });
+    };
+
+    const showThiefExplanationModal = () => {
+      setShowThiefExplanation(true);
+    };
+
+    const isCorrect = userAnswer === puzzle.correctAnswer;
+
+    return (
+      <div className="math-puzzle-game">
+        <div className="game-header">
+          <h3>谁是小偷谜题</h3>
+          <div className="game-controls">
+            <button className="instruction-btn" onClick={showThiefExplanationModal}>
+              答案
+            </button>
+          </div>
+        </div>
+        
+        <div className="math-question">
+          <h4>题目：</h4>
+          <p>{puzzle.question}</p>
+        </div>
+        
+        <div className="math-options">
+          <h4>选项：</h4>
+          {puzzle.options.map((option, index) => (
+            <button
+              key={index}
+              className={`option-btn ${
+                userAnswer === index ? 'selected' : ''
+              } ${
+                gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
+              } ${
+                gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
+              }`}
+              onClick={() => handleAnswerSelect(index)}
+              disabled={gameState.isAnswered}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+        
+        {gameState.isAnswered && (
+          <div className="math-result">
+            {isCorrect ? (
+              <p className="success">🎉 恭喜！答案正确！</p>
+            ) : (
+              <p className="error">❌ 答案不正确，请查看解题思路或答案</p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // 小偷谜题解题思路模态框
+  const ThiefExplanationModal = () => {
+    if (!showThiefExplanation) return null;
+    const puzzle = puzzles['thief-puzzle'] as ThiefPuzzle;
+
+    return (
+      <div className="modal-overlay" onClick={() => setShowThiefExplanation(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>谁是小偷谜题解题思路</h3>
+            <button className="close-btn" onClick={() => setShowThiefExplanation(false)}>×</button>
+          </div>
+          <div className="modal-body">
+            <h4>题目：</h4>
+            <p>{puzzle.question}</p>
+            
+            <h4>解题思路：</h4>
+            <pre className="math-explanation">{puzzle.explanation}</pre>
+            
+            <h4>正确答案：</h4>
+            <p className="correct-answer">{puzzle.options[puzzle.correctAnswer]}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // 渲染当前谜题
   const renderCurrentPuzzle = () => {
     switch (currentPuzzle) {
@@ -819,6 +939,13 @@ function App() {
             <LogicExplanationModal />
           </>
         );
+      case 'thief-puzzle':
+        return (
+          <>
+            <ThiefPuzzleGame />
+            <ThiefExplanationModal />
+          </>
+        );
 
       default:
         return null;
@@ -846,6 +973,7 @@ function App() {
               {puzzleType === 'math-puzzle' && '数学谜题'}
               {puzzleType === 'look-and-say' && '外观数列'}
               {puzzleType === 'logic-puzzle' && '逻辑谜题'}
+              {puzzleType === 'thief-puzzle' && '谁是小偷'}
             </button>
           ))}
         </nav>
