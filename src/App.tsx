@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 
 // 谜题类型定义
-type PuzzleType = 'sudoku' | 'memory' | 'math-puzzle';
+type PuzzleType = 'sudoku' | 'memory' | 'math-puzzle' | 'look-and-say';
 
 // 数独谜题类型
 interface SudokuPuzzle {
@@ -27,6 +27,15 @@ interface MathPuzzle {
   explanation: string;
 }
 
+// 外观数列谜题类型
+interface LookAndSayPuzzle {
+  type: 'look-and-say';
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+}
+
 // emoji图标映射表
 const emojiIcons = [
   '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
@@ -35,7 +44,7 @@ const emojiIcons = [
   '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞'
 ];
 
-type Puzzle = SudokuPuzzle | MemoryPuzzle | MathPuzzle;
+type Puzzle = SudokuPuzzle | MemoryPuzzle | MathPuzzle | LookAndSayPuzzle;
 
 // 示例谜题数据
 const puzzles: Record<PuzzleType, Puzzle> = {
@@ -65,6 +74,13 @@ const puzzles: Record<PuzzleType, Puzzle> = {
       [6, 5, 4, 3, 1, 2]
     ]
   },
+  'look-and-say': {
+    type: 'look-and-say',
+    question: '找规律填数：1, 11, 21, 1211, 111221, ?',
+    options: ['312211', '13112221', '111312211', '31131211131221'],
+    correctAnswer: 0,
+    explanation: '解题思路：\n这是一个著名的外观数列（Look-and-say sequence）\n\n规律分析：\n1 → "一个1" → 11\n11 → "两个1" → 21\n21 → "一个2，一个1" → 1211\n1211 → "一个1，一个2，两个1" → 111221\n111221 → "三个1，两个2，一个1" → 312211\n\n所以下一个数字是312211'
+  },
   memory: {
     type: 'memory',
     size: 4,
@@ -80,6 +96,7 @@ function App() {
   const [showMemoryInstructions, setShowMemoryInstructions] = useState(false);
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [showMathExplanation, setShowMathExplanation] = useState(false);
+  const [showLookAndSayExplanation, setShowLookAndSayExplanation] = useState(false);
 
   // 初始化游戏状态
   const initializeGame = (puzzleType: PuzzleType) => {
@@ -108,6 +125,20 @@ function App() {
         });
         break;
       case 'math-puzzle':
+        setGameState({
+          selectedAnswer: null,
+          isAnswered: false
+        });
+        setUserAnswer(null);
+        break;
+      case 'look-and-say':
+        setGameState({
+          selectedAnswer: null,
+          isAnswered: false
+        });
+        setUserAnswer(null);
+        break;
+      case 'look-and-say':
         setGameState({
           selectedAnswer: null,
           isAnswered: false
@@ -533,6 +564,102 @@ function App() {
     );
   };
 
+  // 外观数列谜题组件
+  const LookAndSayGame = () => {
+    if (!gameState) return null;
+    const puzzle = puzzles['look-and-say'] as LookAndSayPuzzle;
+    
+    const handleAnswerSelect = (answerIndex: number) => {
+      setUserAnswer(answerIndex);
+      setGameState({
+        ...gameState,
+        selectedAnswer: answerIndex,
+        isAnswered: true
+      });
+    };
+
+    const showLookAndSayExplanationModal = () => {
+      setShowLookAndSayExplanation(true);
+    };
+
+    const isCorrect = userAnswer === puzzle.correctAnswer;
+
+    return (
+      <div className="math-puzzle-game">
+        <div className="game-header">
+          <h3>外观数列谜题</h3>
+          <div className="game-controls">
+            <button className="instruction-btn" onClick={showLookAndSayExplanationModal}>
+              答案
+            </button>
+          </div>
+        </div>
+        
+        <div className="math-question">
+          <h4>题目：</h4>
+          <p>{puzzle.question}</p>
+        </div>
+        
+        <div className="math-options">
+          <h4>选项：</h4>
+          {puzzle.options.map((option, index) => (
+            <button
+              key={index}
+              className={`option-btn ${
+                userAnswer === index ? 'selected' : ''
+              } ${
+                gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
+              } ${
+                gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
+              }`}
+              onClick={() => handleAnswerSelect(index)}
+              disabled={gameState.isAnswered}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+        
+        {gameState.isAnswered && (
+          <div className="math-result">
+            {isCorrect ? (
+              <p className="success">🎉 恭喜！答案正确！</p>
+            ) : (
+              <p className="error">❌ 答案不正确，请查看解题思路或答案</p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // 外观数列谜题解题思路模态框
+  const LookAndSayExplanationModal = () => {
+    if (!showLookAndSayExplanation) return null;
+    const puzzle = puzzles['look-and-say'] as LookAndSayPuzzle;
+
+    return (
+      <div className="modal-overlay" onClick={() => setShowLookAndSayExplanation(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>外观数列谜题解题思路</h3>
+            <button className="close-btn" onClick={() => setShowLookAndSayExplanation(false)}>×</button>
+          </div>
+          <div className="modal-body">
+            <h4>题目：</h4>
+            <p>{puzzle.question}</p>
+            
+            <h4>解题思路：</h4>
+            <pre className="math-explanation">{puzzle.explanation}</pre>
+            
+            <h4>正确答案：</h4>
+            <p className="correct-answer">{puzzle.options[puzzle.correctAnswer]}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // 渲染当前谜题
   const renderCurrentPuzzle = () => {
     switch (currentPuzzle) {
@@ -558,6 +685,13 @@ function App() {
             <MathExplanationModal />
           </>
         );
+      case 'look-and-say':
+        return (
+          <>
+            <LookAndSayGame />
+            <LookAndSayExplanationModal />
+          </>
+        );
 
       default:
         return null;
@@ -581,8 +715,9 @@ function App() {
               onClick={() => switchPuzzle(puzzleType as PuzzleType)}
             >
               {puzzleType === 'sudoku' && '数独'}
-            {puzzleType === 'memory' && '记忆翻牌'}
-            {puzzleType === 'math-puzzle' && '数学谜题'}
+              {puzzleType === 'memory' && '记忆翻牌'}
+              {puzzleType === 'math-puzzle' && '数学谜题'}
+              {puzzleType === 'look-and-say' && '外观数列'}
             </button>
           ))}
         </nav>
