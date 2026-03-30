@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 
 // 谜题类型定义
-type PuzzleType = 'sudoku' | 'memory' | 'math-puzzle' | 'look-and-say';
+type PuzzleType = 'sudoku' | 'memory' | 'math-puzzle' | 'look-and-say' | 'logic-puzzle';
 
 // 数独谜题类型
 interface SudokuPuzzle {
@@ -36,6 +36,15 @@ interface LookAndSayPuzzle {
   explanation: string;
 }
 
+// 逻辑谜题类型
+interface LogicPuzzle {
+  type: 'logic-puzzle';
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+}
+
 // emoji图标映射表
 const emojiIcons = [
   '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
@@ -44,7 +53,7 @@ const emojiIcons = [
   '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞'
 ];
 
-type Puzzle = SudokuPuzzle | MemoryPuzzle | MathPuzzle | LookAndSayPuzzle;
+type Puzzle = SudokuPuzzle | MemoryPuzzle | MathPuzzle | LookAndSayPuzzle | LogicPuzzle;
 
 // 示例谜题数据
 const puzzles: Record<PuzzleType, Puzzle> = {
@@ -81,6 +90,13 @@ const puzzles: Record<PuzzleType, Puzzle> = {
     correctAnswer: 0,
     explanation: '解题思路：\n这是一个著名的外观数列（Look-and-say sequence）\n\n规律分析：\n1 → "一个1" → 11\n11 → "两个1" → 21\n21 → "一个2，一个1" → 1211\n1211 → "一个1，一个2，两个1" → 111221\n111221 → "三个1，两个2，一个1" → 312211\n\n所以下一个数字是312211'
   },
+  'logic-puzzle': {
+    type: 'logic-puzzle',
+    question: '如果昨天是明天，今天就是星期五，实际今天是？',
+    options: ['星期三', '星期四', '星期五', '星期日'],
+    correctAnswer: 3,
+    explanation: '解题思路：\n这是一个经典的逻辑推理题。\n\n分析：\n假设"今天"是星期五（在假设条件下）\n那么"明天"就是星期六\n如果"明天"是"昨天"，意味着实际的"昨天"是星期六\n所以实际的"今天"是星期日\n\n验证：\n- 实际今天是星期日\n- 昨天是星期六\n- 如果昨天（星期六）是明天，那么今天就是星期五（因为星期六是星期五的明天）\n- 这与题目条件一致\n\n所以实际今天是星期日'
+  },
   memory: {
     type: 'memory',
     size: 4,
@@ -97,6 +113,7 @@ function App() {
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [showMathExplanation, setShowMathExplanation] = useState(false);
   const [showLookAndSayExplanation, setShowLookAndSayExplanation] = useState(false);
+  const [showLogicExplanation, setShowLogicExplanation] = useState(false);
 
   // 初始化游戏状态
   const initializeGame = (puzzleType: PuzzleType) => {
@@ -139,6 +156,13 @@ function App() {
         setUserAnswer(null);
         break;
       case 'look-and-say':
+        setGameState({
+          selectedAnswer: null,
+          isAnswered: false
+        });
+        setUserAnswer(null);
+        break;
+      case 'logic-puzzle':
         setGameState({
           selectedAnswer: null,
           isAnswered: false
@@ -660,6 +684,102 @@ function App() {
     );
   };
 
+  // 逻辑谜题组件
+  const LogicPuzzleGame = () => {
+    if (!gameState) return null;
+    const puzzle = puzzles['logic-puzzle'] as LogicPuzzle;
+    
+    const handleAnswerSelect = (answerIndex: number) => {
+      setUserAnswer(answerIndex);
+      setGameState({
+        ...gameState,
+        selectedAnswer: answerIndex,
+        isAnswered: true
+      });
+    };
+
+    const showLogicExplanationModal = () => {
+      setShowLogicExplanation(true);
+    };
+
+    const isCorrect = userAnswer === puzzle.correctAnswer;
+
+    return (
+      <div className="math-puzzle-game">
+        <div className="game-header">
+          <h3>逻辑推理谜题</h3>
+          <div className="game-controls">
+            <button className="instruction-btn" onClick={showLogicExplanationModal}>
+              答案
+            </button>
+          </div>
+        </div>
+        
+        <div className="math-question">
+          <h4>题目：</h4>
+          <p>{puzzle.question}</p>
+        </div>
+        
+        <div className="math-options">
+          <h4>选项：</h4>
+          {puzzle.options.map((option, index) => (
+            <button
+              key={index}
+              className={`option-btn ${
+                userAnswer === index ? 'selected' : ''
+              } ${
+                gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
+              } ${
+                gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
+              }`}
+              onClick={() => handleAnswerSelect(index)}
+              disabled={gameState.isAnswered}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+        
+        {gameState.isAnswered && (
+          <div className="math-result">
+            {isCorrect ? (
+              <p className="success">🎉 恭喜！答案正确！</p>
+            ) : (
+              <p className="error">❌ 答案不正确，请查看解题思路或答案</p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // 逻辑谜题解题思路模态框
+  const LogicExplanationModal = () => {
+    if (!showLogicExplanation) return null;
+    const puzzle = puzzles['logic-puzzle'] as LogicPuzzle;
+
+    return (
+      <div className="modal-overlay" onClick={() => setShowLogicExplanation(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>逻辑谜题解题思路</h3>
+            <button className="close-btn" onClick={() => setShowLogicExplanation(false)}>×</button>
+          </div>
+          <div className="modal-body">
+            <h4>题目：</h4>
+            <p>{puzzle.question}</p>
+            
+            <h4>解题思路：</h4>
+            <pre className="math-explanation">{puzzle.explanation}</pre>
+            
+            <h4>正确答案：</h4>
+            <p className="correct-answer">{puzzle.options[puzzle.correctAnswer]}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // 渲染当前谜题
   const renderCurrentPuzzle = () => {
     switch (currentPuzzle) {
@@ -692,6 +812,13 @@ function App() {
             <LookAndSayExplanationModal />
           </>
         );
+      case 'logic-puzzle':
+        return (
+          <>
+            <LogicPuzzleGame />
+            <LogicExplanationModal />
+          </>
+        );
 
       default:
         return null;
@@ -718,6 +845,7 @@ function App() {
               {puzzleType === 'memory' && '记忆翻牌'}
               {puzzleType === 'math-puzzle' && '数学谜题'}
               {puzzleType === 'look-and-say' && '外观数列'}
+              {puzzleType === 'logic-puzzle' && '逻辑谜题'}
             </button>
           ))}
         </nav>
