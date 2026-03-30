@@ -554,22 +554,28 @@ function App() {
         
         <div className="math-options">
           <h4>选项：</h4>
-          {puzzle.options.map((option, index) => (
-            <button
-              key={index}
-              className={`option-btn ${
-                userAnswer === index ? 'selected' : ''
-              } ${
-                gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
-              } ${
-                gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
-              }`}
-              onClick={() => handleAnswerSelect(index)}
-              disabled={gameState.isAnswered}
-            >
-              {option}
-            </button>
-          ))}
+          <div className="options-grid">
+            {puzzle.options.map((option, index) => {
+              const letter = String.fromCharCode(65 + index); // A, B, C, D
+              return (
+                <button
+                  key={index}
+                  className={`option-btn ${
+                    userAnswer === index ? 'selected' : ''
+                  } ${
+                    gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
+                  } ${
+                    gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
+                  }`}
+                  onClick={() => handleAnswerSelect(index)}
+                  disabled={gameState.isAnswered}
+                >
+                  <span className="option-letter">{letter}</span>
+                  <span className="option-text">{option}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
         
         {gameState.isAnswered && (
@@ -650,22 +656,28 @@ function App() {
         
         <div className="math-options">
           <h4>选项：</h4>
-          {puzzle.options.map((option, index) => (
-            <button
-              key={index}
-              className={`option-btn ${
-                userAnswer === index ? 'selected' : ''
-              } ${
-                gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
-              } ${
-                gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
-              }`}
-              onClick={() => handleAnswerSelect(index)}
-              disabled={gameState.isAnswered}
-            >
-              {option}
-            </button>
-          ))}
+          <div className="options-grid">
+            {puzzle.options.map((option, index) => {
+              const letter = String.fromCharCode(65 + index); // A, B, C, D
+              return (
+                <button
+                  key={index}
+                  className={`option-btn ${
+                    userAnswer === index ? 'selected' : ''
+                  } ${
+                    gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
+                  } ${
+                    gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
+                  }`}
+                  onClick={() => handleAnswerSelect(index)}
+                  disabled={gameState.isAnswered}
+                >
+                  <span className="option-letter">{letter}</span>
+                  <span className="option-text">{option}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
         
         {gameState.isAnswered && (
@@ -746,22 +758,28 @@ function App() {
         
         <div className="math-options">
           <h4>选项：</h4>
-          {puzzle.options.map((option, index) => (
-            <button
-              key={index}
-              className={`option-btn ${
-                userAnswer === index ? 'selected' : ''
-              } ${
-                gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
-              } ${
-                gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
-              }`}
-              onClick={() => handleAnswerSelect(index)}
-              disabled={gameState.isAnswered}
-            >
-              {option}
-            </button>
-          ))}
+          <div className="options-grid">
+            {puzzle.options.map((option, index) => {
+              const letter = String.fromCharCode(65 + index); // A, B, C, D
+              return (
+                <button
+                  key={index}
+                  className={`option-btn ${
+                    userAnswer === index ? 'selected' : ''
+                  } ${
+                    gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
+                  } ${
+                    gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
+                  }`}
+                  onClick={() => handleAnswerSelect(index)}
+                  disabled={gameState.isAnswered}
+                >
+                  <span className="option-letter">{letter}</span>
+                  <span className="option-text">{option}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
         
         {gameState.isAnswered && (
@@ -842,22 +860,28 @@ function App() {
         
         <div className="math-options">
           <h4>选项：</h4>
-          {puzzle.options.map((option, index) => (
-            <button
-              key={index}
-              className={`option-btn ${
-                userAnswer === index ? 'selected' : ''
-              } ${
-                gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
-              } ${
-                gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
-              }`}
-              onClick={() => handleAnswerSelect(index)}
-              disabled={gameState.isAnswered}
-            >
-              {option}
-            </button>
-          ))}
+          <div className="options-grid">
+            {puzzle.options.map((option, index) => {
+              const letter = String.fromCharCode(65 + index); // A, B, C, D
+              return (
+                <button
+                  key={index}
+                  className={`option-btn ${
+                    userAnswer === index ? 'selected' : ''
+                  } ${
+                    gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
+                  } ${
+                    gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
+                  }`}
+                  onClick={() => handleAnswerSelect(index)}
+                  disabled={gameState.isAnswered}
+                >
+                  <span className="option-letter">{letter}</span>
+                  <span className="option-text">{option}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
         
         {gameState.isAnswered && (
