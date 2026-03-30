@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 
 // 谜题类型定义
-type PuzzleType = 'sudoku' | 'lights-out' | 'memory';
+type PuzzleType = 'sudoku' | 'memory' | 'math-puzzle';
 
 // 数独谜题类型
 interface SudokuPuzzle {
@@ -11,18 +11,20 @@ interface SudokuPuzzle {
   solution: number[][];
 }
 
-// 熄灯游戏谜题类型
-interface LightsOutPuzzle {
-  type: 'lights-out';
-  size: number;
-  initial: boolean[][];
-}
-
 // 记忆翻牌游戏谜题类型
 interface MemoryPuzzle {
   type: 'memory';
   size: number;
   cards: string[];
+}
+
+// 数学谜题类型
+interface MathPuzzle {
+  type: 'math-puzzle';
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
 }
 
 // emoji图标映射表
@@ -33,44 +35,34 @@ const emojiIcons = [
   '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞'
 ];
 
-type Puzzle = SudokuPuzzle | LightsOutPuzzle | MemoryPuzzle;
+type Puzzle = SudokuPuzzle | MemoryPuzzle | MathPuzzle;
 
 // 示例谜题数据
 const puzzles: Record<PuzzleType, Puzzle> = {
+  'math-puzzle': {
+    type: 'math-puzzle',
+    question: '5只猫5分钟抓5只老鼠，照这个速度，100分钟抓100只老鼠，需要几只猫？',
+    options: ['1只猫', '5只猫', '20只猫', '100只猫'],
+    correctAnswer: 1,
+    explanation: '解题思路：\n5只猫5分钟抓5只老鼠 → 1只猫5分钟抓1只老鼠\n1只猫100分钟抓20只老鼠\n要抓100只老鼠需要100÷20=5只猫\n所以答案是5只猫'
+  },
   sudoku: {
     type: 'sudoku',
     initial: [
-      [5, 3, 0, 0, 7, 0, 0, 0, 0],
-      [6, 0, 0, 1, 9, 5, 0, 0, 0],
-      [0, 9, 8, 0, 0, 0, 0, 6, 0],
-      [8, 0, 0, 0, 6, 0, 0, 0, 3],
-      [4, 0, 0, 8, 0, 3, 0, 0, 1],
-      [7, 0, 0, 0, 2, 0, 0, 0, 6],
-      [0, 6, 0, 0, 0, 0, 2, 8, 0],
-      [0, 0, 0, 4, 1, 9, 0, 0, 5],
-      [0, 0, 0, 0, 8, 0, 0, 7, 9]
+      [1, 0, 0, 0, 0, 0],
+      [0, 2, 0, 0, 0, 0],
+      [0, 0, 3, 0, 0, 0],
+      [0, 0, 0, 4, 0, 0],
+      [0, 0, 0, 0, 5, 0],
+      [0, 0, 0, 0, 0, 6]
     ],
     solution: [
-      [5, 3, 4, 6, 7, 8, 9, 1, 2],
-      [6, 7, 2, 1, 9, 5, 3, 4, 8],
-      [1, 9, 8, 3, 4, 2, 5, 6, 7],
-      [8, 5, 9, 7, 6, 1, 4, 2, 3],
-      [4, 2, 6, 8, 5, 3, 7, 9, 1],
-      [7, 1, 3, 9, 2, 4, 8, 5, 6],
-      [9, 6, 1, 5, 3, 7, 2, 8, 4],
-      [2, 8, 7, 4, 1, 9, 6, 3, 5],
-      [3, 4, 5, 2, 8, 6, 1, 7, 9]
-    ]
-  },
-  'lights-out': {
-    type: 'lights-out',
-    size: 5,
-    initial: [
-      [true, false, true, false, true],
-      [false, true, false, true, false],
-      [true, false, true, false, true],
-      [false, true, false, true, false],
-      [true, false, true, false, true]
+      [1, 4, 2, 5, 3, 6],
+      [3, 2, 6, 1, 4, 5],
+      [4, 6, 3, 2, 5, 1],
+      [2, 1, 5, 4, 6, 3],
+      [5, 3, 1, 6, 2, 4],
+      [6, 5, 4, 3, 1, 2]
     ]
   },
   memory: {
@@ -78,17 +70,16 @@ const puzzles: Record<PuzzleType, Puzzle> = {
     size: 4,
     cards: emojiIcons.slice(0, 8).flatMap(icon => [icon, icon])
   }
-
 };
 
 function App() {
-  const [currentPuzzle, setCurrentPuzzle] = useState<PuzzleType>('sudoku');
+  const [currentPuzzle, setCurrentPuzzle] = useState<PuzzleType>('math-puzzle');
   const [gameState, setGameState] = useState<any>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
-  const [showLightsOutInstructions, setShowLightsOutInstructions] = useState(false);
-  const [showLightsOutSolution, setShowLightsOutSolution] = useState(false);
   const [showMemoryInstructions, setShowMemoryInstructions] = useState(false);
+  const [userAnswer, setUserAnswer] = useState<number | null>(null);
+  const [showMathExplanation, setShowMathExplanation] = useState(false);
 
   // 初始化游戏状态
   const initializeGame = (puzzleType: PuzzleType) => {
@@ -99,12 +90,6 @@ function App() {
         setGameState({
           grid: JSON.parse(JSON.stringify(puzzle.initial)),
           selectedCell: null
-        });
-        break;
-      case 'lights-out':
-        setGameState({
-          lights: JSON.parse(JSON.stringify(puzzle.initial)),
-          moves: 0
         });
         break;
       case 'memory':
@@ -121,6 +106,13 @@ function App() {
           moves: 0,
           matches: 0
         });
+        break;
+      case 'math-puzzle':
+        setGameState({
+          selectedAnswer: null,
+          isAnswered: false
+        });
+        setUserAnswer(null);
         break;
     }
   };
@@ -204,7 +196,7 @@ function App() {
           ))}
         </div>
         <div className="number-pad">
-          {[1,2,3,4,5,6,7,8,9].map(num => (
+          {[1,2,3,4,5,6].map(num => (
             <button key={num} onClick={() => handleNumberInput(num)}>
               {num}
             </button>
@@ -317,81 +309,6 @@ function App() {
     );
   };
 
-  // 熄灯游戏组件
-  const LightsOutGame = () => {
-    if (!gameState) return null;
-    
-    const toggleLight = (row: number, col: number) => {
-      const newLights = [...gameState.lights];
-      
-      // 切换点击的灯和相邻的灯
-      for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-          if (Math.abs(dr) + Math.abs(dc) <= 1) {
-            const newRow = row + dr;
-            const newCol = col + dc;
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
-              newLights[newRow][newCol] = !newLights[newRow][newCol];
-            }
-          }
-        }
-      }
-      
-      setGameState({
-        ...gameState,
-        lights: newLights,
-        moves: gameState.moves + 1
-      });
-    };
-
-    const showLightsOutInstructionsModal = () => {
-      setShowLightsOutInstructions(true);
-    };
-
-    const showLightsOutSolutionModal = () => {
-      setShowLightsOutSolution(true);
-    };
-    // @ts-ignore
-    const isSolved = gameState.lights.flat().every(light => !light);
-
-    return (
-      <div className="lights-out-game">
-        <div className="game-header">
-          <h3>熄灯游戏</h3>
-          <div className="game-controls">
-            <button className="instruction-btn" onClick={showLightsOutInstructionsModal}>
-              游戏说明
-            </button>
-            <button className="solution-btn" onClick={showLightsOutSolutionModal}>
-              查看答案
-            </button>
-          </div>
-        </div>
-        <p>移动次数: {gameState.moves}</p>
-        {isSolved && <p className="success">恭喜！你解决了这个谜题！</p>}
-        <div className="lights-grid">
-          {gameState.lights.map((row: boolean[], rowIndex: number) => (
-            <div key={rowIndex} className="lights-row">
-              {row.map((light: boolean, colIndex: number) => (
-                <button
-                  key={colIndex}
-                  className={`light ${light ? 'on' : 'off'}`}
-                  onClick={() => toggleLight(rowIndex, colIndex)}
-                >
-                  {light ? '💡' : '○'}
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-
-
-
-
   // 数独游戏说明模态框
   const InstructionsModal = () => {
     if (!showInstructions) return null;
@@ -478,47 +395,6 @@ function App() {
     );
   };
 
-  // 熄灯游戏说明模态框
-  const LightsOutInstructionsModal = () => {
-    if (!showLightsOutInstructions) return null;
-
-    return (
-      <div className="modal-overlay" onClick={() => setShowLightsOutInstructions(false)}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>熄灯游戏说明</h3>
-            <button className="close-btn" onClick={() => setShowLightsOutInstructions(false)}>×</button>
-          </div>
-          <div className="modal-body">
-            <h4>游戏规则：</h4>
-            <ul>
-              <li>熄灯游戏是一个5x5的网格，每个格子代表一盏灯</li>
-              <li>初始状态下，部分灯是亮的（💡），部分灯是灭的（○）</li>
-              <li>目标是通过最少的操作将所有灯都熄灭</li>
-              <li>点击任意一盏灯会切换该灯及其上下左右相邻灯的状态</li>
-            </ul>
-            
-            <h4>操作方法：</h4>
-            <ul>
-              <li>点击任意一盏灯来切换其状态</li>
-              <li>每次点击会同时影响点击的灯和相邻的灯</li>
-              <li>游戏会记录你的移动次数</li>
-              <li>当所有灯都熄灭时，游戏胜利</li>
-            </ul>
-            
-            <h4>解题技巧：</h4>
-            <ul>
-              <li>从角落开始，逐步向中间推进</li>
-              <li>注意灯的相互影响关系</li>
-              <li>尝试找出固定的点击模式</li>
-              <li>有些灯需要被点击奇数次，有些需要偶数次</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   // 记忆翻牌游戏说明模态框
   const MemoryInstructionsModal = () => {
     if (!showMemoryInstructions) return null;
@@ -561,66 +437,96 @@ function App() {
     );
   };
 
-  // 熄灯游戏答案显示模态框
-  const LightsOutSolutionModal = () => {
-    if (!showLightsOutSolution) return null;
-    const puzzle = puzzles['lights-out'] as LightsOutPuzzle;
+  // 数学谜题组件
+  const MathPuzzleGame = () => {
+    if (!gameState) return null;
+    const puzzle = puzzles['math-puzzle'] as MathPuzzle;
+    
+    const handleAnswerSelect = (answerIndex: number) => {
+      setUserAnswer(answerIndex);
+      setGameState({
+        ...gameState,
+        selectedAnswer: answerIndex,
+        isAnswered: true
+      });
+    };
 
-    // 计算最优解（这里简化处理，显示初始状态和最终状态）
-    const initialLights = puzzle.initial;
-    const finalLights = initialLights.map(row => row.map(() => false));
+    const showMathExplanationModal = () => {
+      setShowMathExplanation(true);
+    };
+
+    const isCorrect = userAnswer === puzzle.correctAnswer;
 
     return (
-      <div className="modal-overlay" onClick={() => setShowLightsOutSolution(false)}>
-        <div className="modal-content solution-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="math-puzzle-game">
+        <div className="game-header">
+          <h3>数学逻辑谜题</h3>
+          <div className="game-controls">
+            <button className="instruction-btn" onClick={showMathExplanationModal}>
+              答案
+            </button>
+          </div>
+        </div>
+        
+        <div className="math-question">
+          <h4>题目：</h4>
+          <p>{puzzle.question}</p>
+        </div>
+        
+        <div className="math-options">
+          <h4>选项：</h4>
+          {puzzle.options.map((option, index) => (
+            <button
+              key={index}
+              className={`option-btn ${
+                userAnswer === index ? 'selected' : ''
+              } ${
+                gameState.isAnswered && index === puzzle.correctAnswer ? 'correct' : ''
+              } ${
+                gameState.isAnswered && userAnswer === index && userAnswer !== puzzle.correctAnswer ? 'incorrect' : ''
+              }`}
+              onClick={() => handleAnswerSelect(index)}
+              disabled={gameState.isAnswered}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+        
+        {gameState.isAnswered && (
+          <div className="math-result">
+            {isCorrect ? (
+              <p className="success">🎉 恭喜！答案正确！</p>
+            ) : (
+              <p className="error">❌ 答案不正确，请查看解题思路或答案</p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // 数学谜题解题思路模态框
+  const MathExplanationModal = () => {
+    if (!showMathExplanation) return null;
+    const puzzle = puzzles['math-puzzle'] as MathPuzzle;
+
+    return (
+      <div className="modal-overlay" onClick={() => setShowMathExplanation(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
-            <h3>熄灯游戏解法</h3>
-            <button className="close-btn" onClick={() => setShowLightsOutSolution(false)}>×</button>
+            <h3>数学谜题解题思路</h3>
+            <button className="close-btn" onClick={() => setShowMathExplanation(false)}>×</button>
           </div>
           <div className="modal-body">
-            <p>以下是熄灯游戏的解法思路：</p>
+            <h4>题目：</h4>
+            <p>{puzzle.question}</p>
             
-            <h4>初始状态：</h4>
-            <div className="lights-grid solution-lights">
-              {initialLights.map((row: boolean[], rowIndex: number) => (
-                <div key={rowIndex} className="lights-row">
-                  {row.map((light: boolean, colIndex: number) => (
-                    <div
-                      key={colIndex}
-                      className={`light-display ${light ? 'on' : 'off'}`}
-                    >
-                      {light ? '💡' : '○'}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+            <h4>解题思路：</h4>
+            <pre className="math-explanation">{puzzle.explanation}</pre>
             
-            <h4>目标状态（所有灯熄灭）：</h4>
-            <div className="lights-grid solution-lights">
-              {finalLights.map((row: boolean[], rowIndex: number) => (
-                <div key={rowIndex} className="lights-row">
-                  {row.map((light: boolean, colIndex: number) => {
-                    return (
-                      <div
-                        key={colIndex}
-                        className={`light-display ${light ? 'on' : 'off'}`}
-                      >
-                        {light ? '💡' : '○'}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-            
-            <h4>解法提示：</h4>
-            <ul>
-              <li>从左上角开始，按照顺序点击需要操作的灯</li>
-              <li>每个灯最多需要点击一次</li>
-              <li>注意灯之间的连锁反应</li>
-              <li>最优解通常需要15-20次点击</li>
-            </ul>
+            <h4>正确答案：</h4>
+            <p className="correct-answer">{puzzle.options[puzzle.correctAnswer]}</p>
           </div>
         </div>
       </div>
@@ -638,19 +544,18 @@ function App() {
             <SolutionModal />
           </>
         );
-      case 'lights-out':
-        return (
-          <>
-            <LightsOutGame />
-            <LightsOutInstructionsModal />
-            <LightsOutSolutionModal />
-          </>
-        );
       case 'memory':
         return (
           <>
             <MemoryGame />
             <MemoryInstructionsModal />
+          </>
+        );
+      case 'math-puzzle':
+        return (
+          <>
+            <MathPuzzleGame />
+            <MathExplanationModal />
           </>
         );
 
@@ -676,8 +581,8 @@ function App() {
               onClick={() => switchPuzzle(puzzleType as PuzzleType)}
             >
               {puzzleType === 'sudoku' && '数独'}
-            {puzzleType === 'lights-out' && '熄灯游戏'}
             {puzzleType === 'memory' && '记忆翻牌'}
+            {puzzleType === 'math-puzzle' && '数学谜题'}
             </button>
           ))}
         </nav>
